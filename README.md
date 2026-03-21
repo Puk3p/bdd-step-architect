@@ -1,8 +1,27 @@
-# BDD Step Architect
+<h1 align="center">BDD Step Architect</h1>
 
-**Smart BDD Assistant for Playwright and TypeScript** — a VS Code extension that automates the creation of BDD step definitions from `.feature` files, so you can focus on writing tests instead of boilerplate.
+<p align="center">
+  <img src="icons/logo.png" alt="BDD Step Architect Logo" width="180" />
+</p>
 
-Created by **Lupu George**.
+<p align="center">
+  <img src="https://img.shields.io/badge/VS%20Code-Extension-007ACC?style=for-the-badge&logo=visualstudiocode" />
+  <img src="https://img.shields.io/badge/TypeScript-Powered-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Playwright-BDD-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" />
+</p>
+
+<p align="center">
+  <strong>Smart BDD Assistant for Playwright and TypeScript</strong>
+</p>
+
+<p align="center">
+  A VS Code extension that automates the creation of BDD step definitions from
+  <code>.feature</code> files, so you can focus on writing tests instead of boilerplate.
+</p>
+
+<p align="center">
+  Created by <strong>Lupu George</strong>
+</p>
 
 ---
 
