@@ -1,32 +1,60 @@
-export interface ParsedStep {
-    stepType: string;
-    stepText: string;
-    regexPattern: string;
-    variableCount: number;
-}
+import * as vscode from 'vscode';
+import { IStepParser, ParsedStep } from '../interfaces';
+import { GHERKIN_KEYWORD_PATTERN, GHERKIN_ALIAS_KEYWORDS } from './constants';
 
-export class GherkinParser {
-    public parseLine(line: string): ParsedStep | null {
-        const match = line.match(/^(Given|When|Then|And|But)\s+(.*)/);
-        if (!match) return null;
+export class GherkinParser implements IStepParser {
+    public parseContextualLine(document: vscode.TextDocument, lineNumber: number): ParsedStep | null {
+        const lineText = document.lineAt(lineNumber).text.trim();
+        const stepMatch = lineText.match(new RegExp(`^(${GHERKIN_KEYWORD_PATTERN})\\s+(.+)$`));
+        
+        if (!stepMatch) return null;
 
-        const keyword = match[1];
-        const stepType = (keyword === 'And' || keyword === 'But') ? 'When' : keyword;
-        const originalText = match[2];
+        const originalkeyword = stepMatch[1];
+        const stepBody = stepMatch[2];
+        const stepType = (GHERKIN_ALIAS_KEYWORDS as readonly string[]).includes(originalkeyword) ? 'Given' : originalkeyword;
 
-        let regexPattern = originalText;
-        let variableCount = 0;
+        let hasDataTable = false;
+        if (lineNumber + 1 < document.lineCount) {
+            const nextLine = document.lineAt(lineNumber + 1).text.trim();
+            if (nextLine.startsWith('|')) {
+                hasDataTable = true;
+            }
+        }
 
-        regexPattern = regexPattern.replace(/"([^"]+)"/g, () => {
-            variableCount++;
+        let varCount = 0;
+        let regex = stepBody.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
+
+        regex = regex.replace(/"([^"]+)"/g, () => {
+            varCount++;
             return '"([^"]+)"';
         });
 
-        regexPattern = regexPattern.replace(/\b\d+(?:\.\d+)?\b/g, () => {
-            variableCount++;
-            return '(\\d+(?:\\.\\d+)?)';
-        });
+        const aliasPattern = /(?:\s+(as|for\s+session)\s+([a-zA-Z]+)(\d+))$/;
+        
+        const aliasMatchFound = stepBody.match(aliasPattern);
+        
+        if (aliasMatchFound) {
+            const prefix = aliasMatchFound[1];
+            const word = aliasMatchFound[2];
+            
+            regex = regex.replace(new RegExp(`\\s+${prefix}\\s+${word}\\d+$`), '');
+            
+            regex += `(?: ${prefix} (${word}\\d+))?`;
+            varCount++;
+        } else {
+            const numberRegex = /(\d+(?:\.\d+)?)/g;
+            regex = regex.replace(new RegExp(`\\s${numberRegex.source}(\\s|$)`, 'g'), (match, num, trailingSpace) => {
+                varCount++;
+                return ` (\\d+(?:\\.\\d+)?)$1`;
+            });
+        }
 
-        return { stepType, stepText: originalText, regexPattern, variableCount };
+        return {
+            stepType,
+            stepText: stepBody,
+            regexPattern: regex,
+            variableCount: varCount,
+            hasDataTable
+        };
     }
 }

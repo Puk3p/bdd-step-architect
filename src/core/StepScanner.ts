@@ -1,11 +1,8 @@
 import * as vscode from 'vscode';
+import { IStepScanner, StepDefinition } from '../interfaces';
+import { GHERKIN_KEYWORD_PATTERN } from './constants';
 
-export interface StepDefinition {
-    type: string;
-    pattern: string;
-}
-
-export class StepScanner {
+export class StepScanner implements IStepScanner {
     private steps: StepDefinition[] = [];
 
     public async scanWorkspace(): Promise<void> {
@@ -17,7 +14,7 @@ export class StepScanner {
             const document = await vscode.workspace.openTextDocument(file);
             const text = document.getText();
 
-            const stepRegex = /(Given|When|Then|And|But)\s*\(\s*[/`'"](.*?)[/`'"]/g;
+            const stepRegex = new RegExp(`(${GHERKIN_KEYWORD_PATTERN})\\s*\\(\\s*[/\`'"](.*?)[/\`'"]`, 'g');
             let match;
 
             while ((match = stepRegex.exec(text)) !== null) {

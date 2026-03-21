@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import { StepScanner } from '../core/StepScanner';
+import { IStepScanner } from '../interfaces';
+import { GHERKIN_KEYWORD_PATTERN } from '../core/constants';
 
 export class BddCompletionProvider implements vscode.CompletionItemProvider {
-    constructor(private scanner: StepScanner) {}
+    constructor(private scanner: IStepScanner) {}
 
     provideCompletionItems(
         document: vscode.TextDocument,
@@ -11,7 +12,7 @@ export class BddCompletionProvider implements vscode.CompletionItemProvider {
         
         const linePrefix = document.lineAt(position).text.substring(0, position.character);
         
-        const match = linePrefix.match(/^\s*(Given|When|Then|And|But)\s+/);
+        const match = linePrefix.match(new RegExp(`^\\s*(${GHERKIN_KEYWORD_PATTERN})\\s+`));
         if (!match) {
             return undefined;
         }

@@ -14,12 +14,21 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "bdd-step-architect.helloWorld",
-        "title": "Hello World"
+    "configuration": {
+      "title": "BDD Step Architect",
+      "properties": {
+        "bddStepArchitect.stepsImportPath": {
+          "type": "string",
+          "default": "src/steps/bdd",
+          "description": "The path used to import Gherkin keywords (Given, When, Then)."
+        },
+        "bddStepArchitect.worldImportPath": {
+          "type": "string",
+          "default": "src/support/worlds/UnifiedWorld",
+          "description": "The path used to import the UnifiedWorld interface/class."
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
