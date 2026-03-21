@@ -80,7 +80,7 @@ The codebase follows **SOLID principles**:
 
 ### Install & Run
 ```bash
-git clone https://github.com/your-username/bdd-step-architect.git
+git clone https://github.com/Puk3p/bdd-step-architect.git
 cd bdd-step-architect
 npm install
 npm run compile
