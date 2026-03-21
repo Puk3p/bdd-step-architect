@@ -10,6 +10,8 @@ import { ImportResolver } from './services/ImportResolver';
 import { FileSelector } from './services/FileSelector';
 import { AnimationService } from './services/AnimationService';
 import { InsertStepCommandHandler } from './commands/InsertStepCommandHandler';
+import { FeatureScanner } from './services/FeatureScanner';
+import { BddDefinitionProvider } from './providers/BddDefinitionProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
     console.log('BDD Step Architect Pro initialized successfully.');
@@ -21,6 +23,9 @@ export async function activate(context: vscode.ExtensionContext) {
     const fileSelector = new FileSelector();
     const importResolver = new ImportResolver(configProvider);
     const animationService = new AnimationService();
+
+    const featureScanner = new FeatureScanner();
+
     const commandHandler = new InsertStepCommandHandler(generator, fileSelector, importResolver, animationService);
 
     const actionProvider = new BddCodeActionProvider(parser, generator);
@@ -43,6 +48,13 @@ export async function activate(context: vscode.ExtensionContext) {
         await commandHandler.execute(parsedStep);
     });
 
+    const showUsagesCommand = vscode.commands.registerCommand(
+        'bdd-step-architect.showStepUsages',
+        async (uri: vscode.Uri, position: vscode.Position, locations: vscode.Location[]) => {
+            await vscode.commands.executeCommand('editor.action.showReferences', uri, position, locations);
+        },
+    );
+
     const quickFixProvider = vscode.languages.registerCodeActionsProvider({ pattern: '**/*.feature' }, actionProvider, {
         providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
     });
@@ -53,10 +65,23 @@ export async function activate(context: vscode.ExtensionContext) {
         ' ',
     );
 
-    const codeLensProvider = new BddCodeLensProvider();
+    const codeLensProvider = new BddCodeLensProvider(featureScanner);
     const codeLensRegistration = vscode.languages.registerCodeLensProvider({ pattern: '**/*.ts' }, codeLensProvider);
 
-    context.subscriptions.push(insertCommand, quickFixProvider, autoCompletion, tsWatcher, codeLensRegistration);
+    const definitionProvider = vscode.languages.registerDefinitionProvider(
+        { pattern: '**/*.feature' },
+        new BddDefinitionProvider(),
+    );
+
+    context.subscriptions.push(
+        insertCommand,
+        showUsagesCommand,
+        quickFixProvider,
+        autoCompletion,
+        tsWatcher,
+        codeLensRegistration,
+        definitionProvider,
+    );
 }
 
 export function deactivate() {}

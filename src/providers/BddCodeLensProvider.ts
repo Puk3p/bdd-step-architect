@@ -1,8 +1,14 @@
 import * as vscode from 'vscode';
 import { STEP_DEFINITION_KEYWORD_PATTERN } from '../core/constants';
+import { IFeatureScanner } from '../interfaces';
 
 export class BddCodeLensProvider implements vscode.CodeLensProvider {
-    public provideCodeLenses(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.CodeLens[] {
+    constructor(private featureScanner: IFeatureScanner) {}
+
+    public async provideCodeLenses(
+        document: vscode.TextDocument,
+        _token: vscode.CancellationToken,
+    ): Promise<vscode.CodeLens[]> {
         const lenses: vscode.CodeLens[] = [];
         const text = document.getText();
 
@@ -23,13 +29,35 @@ export class BddCodeLensProvider implements vscode.CodeLensProvider {
             const line = document.positionAt(match.index).line;
             const range = new vscode.Range(line, 0, line, 0);
 
-            const command: vscode.Command = {
-                title: `✨ BDD: ${keyword} ${humanReadable}`,
-                command: '',
-                tooltip: 'This is how Gherkin translates your Regex',
-            };
+            let title = `✨ BDD: ${keyword} ${humanReadable}`;
+            let commandAction: vscode.Command;
 
-            lenses.push(new vscode.CodeLens(range, command));
+            try {
+                const actualRegex = new RegExp(`^${pattern}$`);
+                const usage = await this.featureScanner.getStepUsage(actualRegex);
+
+                if (usage.count > 0) {
+                    title += `   |   📊 Used in ${usage.count} scenarios (Click to view)`;
+
+                    commandAction = {
+                        title: title,
+                        command: 'bdd-step-architect.showStepUsages',
+                        arguments: [document.uri, new vscode.Position(line, 0), usage.locations],
+                        tooltip: 'Click to see all places where this step is used',
+                    };
+                } else {
+                    title += `   |   ⚠️ Unused step`;
+                    commandAction = {
+                        title: title,
+                        command: '',
+                        tooltip: 'This step is currently not used anywhere',
+                    };
+                }
+            } catch {
+                commandAction = { title, command: '' };
+            }
+
+            lenses.push(new vscode.CodeLens(range, commandAction));
         }
 
         return lenses;
