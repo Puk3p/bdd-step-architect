@@ -24,7 +24,7 @@ export class StepScanner implements IStepScanner {
                 });
             }
         }
-        console.log(`✅ Am scanat și găsit ${this.steps.length} pași existenți în proiect!`);
+        console.log(`Scanned workspace and found ${this.steps.length} existing step definitions.`);
     }
 
     public getSteps(): StepDefinition[] {

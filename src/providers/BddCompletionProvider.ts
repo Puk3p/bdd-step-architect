@@ -23,7 +23,7 @@ export class BddCompletionProvider implements vscode.CompletionItemProvider {
             const cleanText = step.pattern.replace(/^\^|\$$/g, '').replace(/\\"/g, '"');
 
             const completion = new vscode.CompletionItem(cleanText, vscode.CompletionItemKind.Snippet);
-            completion.detail = `${step.type} (existent în proiect)`;
+            completion.detail = `${step.type} (existing in project)`;
             completion.insertText = cleanText;
 
             completions.push(completion);
