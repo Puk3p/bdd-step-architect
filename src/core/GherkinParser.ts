@@ -6,12 +6,16 @@ export class GherkinParser implements IStepParser {
     public parseContextualLine(document: vscode.TextDocument, lineNumber: number): ParsedStep | null {
         const lineText = document.lineAt(lineNumber).text.trim();
         const stepMatch = lineText.match(new RegExp(`^(${GHERKIN_KEYWORD_PATTERN})\\s+(.+)$`));
-        
-        if (!stepMatch) return null;
+
+        if (!stepMatch) {
+            return null;
+        }
 
         const originalkeyword = stepMatch[1];
         const stepBody = stepMatch[2];
-        const stepType = (GHERKIN_ALIAS_KEYWORDS as readonly string[]).includes(originalkeyword) ? 'Given' : originalkeyword;
+        const stepType = (GHERKIN_ALIAS_KEYWORDS as readonly string[]).includes(originalkeyword)
+            ? 'Given'
+            : originalkeyword;
 
         let hasDataTable = false;
         if (lineNumber + 1 < document.lineCount) {
@@ -22,7 +26,7 @@ export class GherkinParser implements IStepParser {
         }
 
         let varCount = 0;
-        let regex = stepBody.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
+        let regex = stepBody.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
         regex = regex.replace(/"([^"]+)"/g, () => {
             varCount++;
@@ -30,23 +34,26 @@ export class GherkinParser implements IStepParser {
         });
 
         const aliasPattern = /(?:\s+(as|for\s+session)\s+([a-zA-Z]+)(\d+))$/;
-        
+
         const aliasMatchFound = stepBody.match(aliasPattern);
-        
+
         if (aliasMatchFound) {
             const prefix = aliasMatchFound[1];
             const word = aliasMatchFound[2];
-            
+
             regex = regex.replace(new RegExp(`\\s+${prefix}\\s+${word}\\d+$`), '');
-            
+
             regex += `(?: ${prefix} (${word}\\d+))?`;
             varCount++;
         } else {
             const numberRegex = /(\d+(?:\.\d+)?)/g;
-            regex = regex.replace(new RegExp(`\\s${numberRegex.source}(\\s|$)`, 'g'), (match, num, trailingSpace) => {
-                varCount++;
-                return ` (\\d+(?:\\.\\d+)?)$1`;
-            });
+            regex = regex.replace(
+                new RegExp(`\\s${numberRegex.source}(\\s|$)`, 'g'),
+                (_match, _num, _trailingSpace) => {
+                    varCount++;
+                    return ` (\\d+(?:\\.\\d+)?)$1`;
+                },
+            );
         }
 
         return {
@@ -54,7 +61,7 @@ export class GherkinParser implements IStepParser {
             stepText: stepBody,
             regexPattern: regex,
             variableCount: varCount,
-            hasDataTable
+            hasDataTable,
         };
     }
 }

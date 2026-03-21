@@ -24,36 +24,37 @@ export async function activate(context: vscode.ExtensionContext) {
     const commandHandler = new InsertStepCommandHandler(generator, fileSelector, importResolver, animationService);
 
     const actionProvider = new BddCodeActionProvider(parser, generator);
-    await scanner.scanWorkspace(); 
+    await scanner.scanWorkspace();
     const completionProvider = new BddCompletionProvider(scanner);
 
     const tsWatcher = vscode.workspace.createFileSystemWatcher('**/*.ts');
-    
-    tsWatcher.onDidChange(async () => { await scanner.scanWorkspace(); });
-    tsWatcher.onDidCreate(async () => { await scanner.scanWorkspace(); });
-    tsWatcher.onDidDelete(async () => { await scanner.scanWorkspace(); });
+
+    tsWatcher.onDidChange(async () => {
+        await scanner.scanWorkspace();
+    });
+    tsWatcher.onDidCreate(async () => {
+        await scanner.scanWorkspace();
+    });
+    tsWatcher.onDidDelete(async () => {
+        await scanner.scanWorkspace();
+    });
 
     const insertCommand = vscode.commands.registerCommand('bdd-step-architect.insertStep', async (parsedStep: any) => {
         await commandHandler.execute(parsedStep);
     });
 
-    const quickFixProvider = vscode.languages.registerCodeActionsProvider(
-        { pattern: '**/*.feature' },
-        actionProvider,
-        { providedCodeActionKinds: [vscode.CodeActionKind.QuickFix] }
-    );
+    const quickFixProvider = vscode.languages.registerCodeActionsProvider({ pattern: '**/*.feature' }, actionProvider, {
+        providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
+    });
 
     const autoCompletion = vscode.languages.registerCompletionItemProvider(
         { pattern: '**/*.feature' },
         completionProvider,
-        ' '
+        ' ',
     );
 
     const codeLensProvider = new BddCodeLensProvider();
-    const codeLensRegistration = vscode.languages.registerCodeLensProvider(
-        { pattern: '**/*.ts' }, 
-        codeLensProvider
-    );
+    const codeLensRegistration = vscode.languages.registerCodeLensProvider({ pattern: '**/*.ts' }, codeLensProvider);
 
     context.subscriptions.push(insertCommand, quickFixProvider, autoCompletion, tsWatcher, codeLensRegistration);
 }

@@ -2,21 +2,20 @@ import * as vscode from 'vscode';
 import { STEP_DEFINITION_KEYWORD_PATTERN } from '../core/constants';
 
 export class BddCodeLensProvider implements vscode.CodeLensProvider {
-    
-    public provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
+    public provideCodeLenses(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.CodeLens[] {
         const lenses: vscode.CodeLens[] = [];
         const text = document.getText();
-        
+
         const stepRegex = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*\\/\\^(.+?)\\$\\/`, 'g');
         let match;
 
         while ((match = stepRegex.exec(text)) !== null) {
             const keyword = match[1];
-            let pattern = match[2];
+            const pattern = match[2];
 
-            let humanReadable = pattern
+            const humanReadable = pattern
                 .replace(/\(\[\^"\]\+\)/g, '{string}')
-                .replace(/\(\[\^'\]\+\)/g, "{string}")
+                .replace(/\(\[\^'\]\+\)/g, '{string}')
                 .replace(/\(\\d\+\(\?:\.\\d\+\)\?\)/g, '{number}')
                 .replace(/\\\?/g, '?')
                 .replace(/\(\?:\s.*?\)\?/g, '{optional}');
@@ -26,8 +25,8 @@ export class BddCodeLensProvider implements vscode.CodeLensProvider {
 
             const command: vscode.Command = {
                 title: `✨ BDD: ${keyword} ${humanReadable}`,
-                command: "",
-                tooltip: "This is how Gherkin translates your Regex"
+                command: '',
+                tooltip: 'This is how Gherkin translates your Regex',
             };
 
             lenses.push(new vscode.CodeLens(range, command));

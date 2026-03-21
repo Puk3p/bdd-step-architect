@@ -20,8 +20,10 @@ export class SnippetGenerator implements ISnippetGenerator {
             variableArgs += ', dataTable: any';
         }
 
-        return `${parsedStep.stepType}(/^${parsedStep.regexPattern}$/, async ({ world }: { world: UnifiedWorld }${variableArgs}) => {\n` +
-               `  // TODO: Implement logic for "${parsedStep.stepText}"\n` +
-               `});\n`;
+        return (
+            `${parsedStep.stepType}(/^${parsedStep.regexPattern}$/, async ({ world }: { world: UnifiedWorld }${variableArgs}) => {\n` +
+            `  // TODO: Implement logic for "${parsedStep.stepText}"\n` +
+            `});\n`
+        );
     }
 }

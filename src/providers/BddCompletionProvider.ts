@@ -7,11 +7,10 @@ export class BddCompletionProvider implements vscode.CompletionItemProvider {
 
     provideCompletionItems(
         document: vscode.TextDocument,
-        position: vscode.Position
+        position: vscode.Position,
     ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
-        
         const linePrefix = document.lineAt(position).text.substring(0, position.character);
-        
+
         const match = linePrefix.match(new RegExp(`^\\s*(${GHERKIN_KEYWORD_PATTERN})\\s+`));
         if (!match) {
             return undefined;

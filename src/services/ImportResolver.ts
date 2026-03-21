@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { IImportResolver } from '../interfaces';
-import { IConfigProvider } from '../interfaces';
+import { IImportResolver, IConfigProvider } from '../interfaces';
 
 export class ImportResolver implements IImportResolver {
     constructor(private configProvider: IConfigProvider) {}
@@ -17,7 +16,7 @@ export class ImportResolver implements IImportResolver {
         const stepMatch = text.match(stepImportRegex);
 
         if (stepMatch) {
-            const existingKeywords = stepMatch[1].split(',').map(k => k.trim());
+            const existingKeywords = stepMatch[1].split(',').map((k) => k.trim());
             if (!existingKeywords.includes(stepType)) {
                 existingKeywords.push(stepType);
                 const newImportStr = `import { ${existingKeywords.join(', ')} } from '${stepsImportPath}'`;

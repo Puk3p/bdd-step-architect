@@ -20,7 +20,7 @@ export class StepScanner implements IStepScanner {
             while ((match = stepRegex.exec(text)) !== null) {
                 this.steps.push({
                     type: match[1],
-                    pattern: match[2]
+                    pattern: match[2],
                 });
             }
         }
