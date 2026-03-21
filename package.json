@@ -2,7 +2,7 @@
     "name": "bdd-step-architect",
     "displayName": "BDD Step Architect",
     "description": "Smart BDD Assistant for Playwright and TypeScript",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "publisher": "Puk3p",
     "icon": "icons/logo.png",
     "author": {
@@ -14,7 +14,7 @@
         "url": "https://github.com/Puk3p/bdd-step-architect"
     },
     "engines": {
-        "vscode": "^1.110.0"
+        "vscode": "^1.105.0"
     },
     "categories": [
         "Testing",
