@@ -3,17 +3,34 @@
     "displayName": "BDD Step Architect",
     "description": "Smart BDD Assistant for Playwright and TypeScript",
     "version": "0.0.1",
+    "publisher": "Puk3p",
+    "author": {
+        "name": "Lupu George"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Puk3p/bdd-step-architect"
+    },
     "engines": {
         "vscode": "^1.110.0"
     },
     "categories": [
-        "Other"
+        "Testing",
+        "Snippets"
     ],
     "activationEvents": [
-        "*"
+        "onLanguage:feature",
+        "onLanguage:typescript"
     ],
     "main": "./out/extension.js",
     "contributes": {
+        "commands": [
+            {
+                "command": "bdd-step-architect.insertStep",
+                "title": "BDD: Insert Step Definition"
+            }
+        ],
         "configuration": {
             "title": "BDD Step Architect",
             "properties": {
