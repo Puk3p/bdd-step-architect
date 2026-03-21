@@ -7,3 +7,4 @@ export { IConfigProvider } from './IConfigProvider';
 export { IImportResolver } from './IImportResolver';
 export { IFileSelector } from './IFileSelector';
 export { IAnimationService } from './IAnimationService';
+export { IFeatureScanner } from './IFeatureScanner';
