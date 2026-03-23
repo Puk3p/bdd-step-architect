@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
+import { IGutterDecorator } from '../interfaces';
 
-export class GutterDecorator {
+export class GutterDecorator implements IGutterDecorator {
     private givenDecoration = vscode.window.createTextEditorDecorationType({
         isWholeLine: true,
         borderWidth: '0 0 0 4px',
