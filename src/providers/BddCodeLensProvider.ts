@@ -12,19 +12,22 @@ export class BddCodeLensProvider implements vscode.CodeLensProvider {
         const lenses: vscode.CodeLens[] = [];
         const text = document.getText();
 
-        const stepRegex = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*\\/\\^(.+?)\\$\\/`, 'g');
+        const stepRegex = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*\\/(.+?)\\/`, 'g');
         let match;
 
         while ((match = stepRegex.exec(text)) !== null) {
             const keyword = match[1];
-            const pattern = match[2];
+            const rawPattern = match[2];
 
-            const humanReadable = pattern
+            const cleanPattern = rawPattern.replace(/^\^/, '').replace(/\$$/, '');
+
+            const humanReadable = cleanPattern
                 .replace(/\(\[\^"\]\+\)/g, '{string}')
                 .replace(/\(\[\^'\]\+\)/g, '{string}')
                 .replace(/\(\\d\+\(\?:\.\\d\+\)\?\)/g, '{number}')
                 .replace(/\\\?/g, '?')
-                .replace(/\(\?:\s.*?\)\?/g, '{optional}');
+                .replace(/\(\?:\s.*?\)\?/g, '{optional}')
+                .replace(/\(([^)|]+)\|([^)|]+)\)/g, '{$1 or $2}');
 
             const line = document.positionAt(match.index).line;
             const range = new vscode.Range(line, 0, line, 0);
@@ -33,7 +36,7 @@ export class BddCodeLensProvider implements vscode.CodeLensProvider {
             let commandAction: vscode.Command;
 
             try {
-                const actualRegex = new RegExp(`^${pattern}$`);
+                const actualRegex = new RegExp(`^${cleanPattern}$`);
                 const usage = await this.featureScanner.getStepUsage(actualRegex);
 
                 if (usage.count > 0) {

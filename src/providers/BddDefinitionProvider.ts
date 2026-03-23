@@ -21,13 +21,15 @@ export class BddDefinitionProvider implements vscode.DefinitionProvider {
             const doc = await vscode.workspace.openTextDocument(file);
             const text = doc.getText();
 
-            const stepRegex = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*\\/\\^(.+?)\\$\\/`, 'g');
+            const stepRegex = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*\\/(.+?)\\/`, 'g');
             let execMatch;
 
             while ((execMatch = stepRegex.exec(text)) !== null) {
-                const pattern = execMatch[2];
+                const rawPattern = execMatch[2];
+                const cleanPattern = rawPattern.replace(/^\^/, '').replace(/\$$/, '');
+
                 try {
-                    const regex = new RegExp(`^${pattern}$`);
+                    const regex = new RegExp(`^${cleanPattern}$`);
                     if (regex.test(stepBody)) {
                         const startPos = doc.positionAt(execMatch.index);
                         return new vscode.Location(file, startPos);
