@@ -1,17 +1,19 @@
 import * as vscode from 'vscode';
-import { BddCodeActionProvider } from './providers/BddCodeActionProvider';
-import { BddCompletionProvider } from './providers/BddCompletionProvider';
-import { BddCodeLensProvider } from './providers/BddCodeLensProvider';
+import { InsertStepCommandHandler } from './commands/InsertStepCommandHandler';
 import { GherkinParser } from './core/GherkinParser';
 import { SnippetGenerator } from './core/SnippetGenerator';
 import { StepScanner } from './core/StepScanner';
-import { ConfigProvider } from './services/ConfigProvider';
-import { ImportResolver } from './services/ImportResolver';
-import { FileSelector } from './services/FileSelector';
-import { AnimationService } from './services/AnimationService';
-import { InsertStepCommandHandler } from './commands/InsertStepCommandHandler';
-import { FeatureScanner } from './services/FeatureScanner';
+import { BddCodeActionProvider } from './providers/BddCodeActionProvider';
+import { BddCodeLensProvider } from './providers/BddCodeLensProvider';
+import { BddCompletionProvider } from './providers/BddCompletionProvider';
 import { BddDefinitionProvider } from './providers/BddDefinitionProvider';
+import { AnimationService } from './services/AnimationService';
+import { ConfigProvider } from './services/ConfigProvider';
+import { FeatureScanner } from './services/FeatureScanner';
+import { FileSelector } from './services/FileSelector';
+import { GutterDecorator } from './services/GutterDecorator';
+import { ImportResolver } from './services/ImportResolver';
+import { ParameterHighlighter } from './services/ParameterHighlighter';
 
 export async function activate(context: vscode.ExtensionContext) {
     console.log('BDD Step Architect Pro initialized successfully.');
@@ -23,26 +25,38 @@ export async function activate(context: vscode.ExtensionContext) {
     const fileSelector = new FileSelector();
     const importResolver = new ImportResolver(configProvider);
     const animationService = new AnimationService();
-
     const featureScanner = new FeatureScanner();
 
     const commandHandler = new InsertStepCommandHandler(generator, fileSelector, importResolver, animationService);
-
     const actionProvider = new BddCodeActionProvider(parser, generator);
+
     await scanner.scanWorkspace();
     const completionProvider = new BddCompletionProvider(scanner);
 
-    const tsWatcher = vscode.workspace.createFileSystemWatcher('**/*.ts');
+    const highlighter = new ParameterHighlighter();
+    const gutterDecorator = new GutterDecorator();
 
-    tsWatcher.onDidChange(async () => {
-        await scanner.scanWorkspace();
+    if (vscode.window.activeTextEditor) {
+        highlighter.highlight(vscode.window.activeTextEditor);
+        gutterDecorator.decorate(vscode.window.activeTextEditor);
+    }
+
+    const activeEditorChange = vscode.window.onDidChangeActiveTextEditor((editor) => {
+        highlighter.highlight(editor);
+        gutterDecorator.decorate(editor);
     });
-    tsWatcher.onDidCreate(async () => {
-        await scanner.scanWorkspace();
+
+    const documentChange = vscode.workspace.onDidChangeTextDocument((event) => {
+        if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+            highlighter.highlight(vscode.window.activeTextEditor);
+            gutterDecorator.decorate(vscode.window.activeTextEditor);
+        }
     });
-    tsWatcher.onDidDelete(async () => {
-        await scanner.scanWorkspace();
-    });
+
+    const tsWatcher = vscode.workspace.createFileSystemWatcher('**/*.ts');
+    tsWatcher.onDidChange(async () => await scanner.scanWorkspace());
+    tsWatcher.onDidCreate(async () => await scanner.scanWorkspace());
+    tsWatcher.onDidDelete(async () => await scanner.scanWorkspace());
 
     const insertCommand = vscode.commands.registerCommand('bdd-step-architect.insertStep', async (parsedStep: any) => {
         await commandHandler.execute(parsedStep);
@@ -81,6 +95,8 @@ export async function activate(context: vscode.ExtensionContext) {
         tsWatcher,
         codeLensRegistration,
         definitionProvider,
+        activeEditorChange,
+        documentChange,
     );
 }
 
