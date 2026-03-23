@@ -7,6 +7,21 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 - *No unreleased changes at the moment.*
 
+## [0.0.5] - The "God Mode" & Refactoring Update
+
+### Added
+- **The "God Button" (Bulk Step Generator):** A smart CodeLens now appears directly above the `Scenario:` keyword in `.feature` files. The extension automatically scans the scenario and, if it detects unimplemented steps (missing from TypeScript), displays a `✨ Generate X Missing Steps` button. One click lets you choose the target file, and the extension generates all the TypeScript boilerplate functions at once. No more one-by-one "Quick Fix" drudgery.
+- **Global Step Rename (Smart Refactoring):** Right-click any step in the Step Catalog and select `✏️ Edit / Rename Step`. The extension doesn't just modify the regex in the `.ts` file — it scans every `.feature` file in the project and updates all references from the old step text to the new one. Clean, safe, global refactoring.
+- **Dead Code Sweeper (Unused Step Report):** In large projects, orphan steps accumulate over time. A new command (and a `🗑️` button in the catalog toolbar) scans the entire workspace. The extension compares the TypeScript step dictionary with what's actually used in `.feature` files and generates a detailed report in the VS Code Output Channel, showing exact file paths and steps that can be safely deleted.
+- **Test Data Teleporter (File Links):** Words written between quotes (without spaces) in `.feature` files (e.g., `Given a request from file "prtMandatoryFields"`) now become clickable links. Hold `Ctrl` / `Cmd` and click to automatically find the associated data file (`.json`, `.ts`, etc.) and open it in a split view panel.
+
+### Changed
+- **Smart Step Catalog (Teleport & UI Overhaul):** The sidebar catalog no longer inserts text — it now acts as a "Tree Map" of the project. Clicking a step in the catalog instantly teleports you to the exact line in the `.ts` file where it's implemented.
+  - **Native color codes:** Catalog icons are now color-coded (Blue for Given, Yellow for When, Green for Then).
+  - **Visible metadata:** The source file name is shown next to each step (e.g., `login.steps.ts`), and hovering displays an elegant Markdown popup with the clean regex pattern.
+- **SOLID Architecture Cleanup:** Extracted 4 command handlers (`JumpToStepCommandHandler`, `RenameStepCommandHandler`, `BulkGenerateCommandHandler`, `OpenTestDataCommandHandler`) from `extension.ts`. Added `IGutterDecorator` and `IParameterHighlighter` interfaces. `extension.ts` reduced from 282 to 104 lines — now a pure orchestrator with zero business logic.
+- **Codebase Cleanup:** Removed all comments, translated all Romanian text to English, fixed lint errors.
+
 ## [0.0.4] - The "Smart Assistant" Update
 
 ### Added
