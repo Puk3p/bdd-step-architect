@@ -30,8 +30,46 @@
             {
                 "command": "bdd-step-architect.insertStep",
                 "title": "BDD: Insert Step Definition"
+            },
+            {
+                "command": "bdd-step-architect.insertStepFromCatalog",
+                "title": "Insert Step",
+                "icon": "$(add)"
+            },
+            {
+                "command": "bdd-step-architect.jumpToStep",
+                "title": "Jump to Step"
+            },
+            {
+                "command": "bdd-step-architect.renameStep",
+                "title": "✏️ Edit / Rename Step"
+            },
+            {
+                "command": "bdd-step-architect.findUnusedSteps",
+                "title": "BDD: Find Unused Steps (Dead Code)",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "bdd-step-architect.generateBulkSteps",
+                "title": "BDD: Generate Bulk Steps"
             }
         ],
+        "menus": {
+            "view/item/context": [
+                {
+                    "command": "bdd-step-architect.renameStep",
+                    "when": "view == bddStepCatalog && viewItem == step",
+                    "group": "inline"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "bdd-step-architect.findUnusedSteps",
+                    "when": "view == bddStepCatalog",
+                    "group": "navigation"
+                }
+            ]
+        },
         "configuration": {
             "title": "BDD Step Architect",
             "properties": {
@@ -46,6 +84,23 @@
                     "description": "The path used to import the UnifiedWorld interface/class."
                 }
             }
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "bdd-step-architect-explorer",
+                    "title": "BDD Step Architect",
+                    "icon": "icons/logo.png"
+                }
+            ]
+        },
+        "views": {
+            "bdd-step-architect-explorer": [
+                {
+                    "id": "bddStepCatalog",
+                    "name": "Step Catalog"
+                }
+            ]
         }
     },
     "scripts": {
@@ -54,8 +109,8 @@
         "watch": "tsc -watch -p ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src",
-        "format": "prettier --write \"src/**/*.ts\" \"*.mjs\" \"*.js\" \"*.json\" --ignore-path .prettierignore",
-        "format:check": "prettier --check \"src/**/*.ts\" \"*.mjs\" \"*.js\" \"*.json\" --ignore-path .prettierignore",
+        "format": "prettier --write \"src/**/*.ts\" \"*.mjs\" \"*.json\" --ignore-path .prettierignore",
+        "format:check": "prettier --check \"src/**/*.ts\" \"*.mjs\" \"*.json\" --ignore-path .prettierignore",
         "test": "vscode-test",
         "prepare": "husky"
     },

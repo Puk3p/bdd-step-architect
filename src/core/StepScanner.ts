@@ -18,9 +18,12 @@ export class StepScanner implements IStepScanner {
             let match;
 
             while ((match = stepRegex.exec(text)) !== null) {
+                const position = document.positionAt(match.index);
+
                 this.steps.push({
                     type: match[1],
                     pattern: match[2],
+                    location: new vscode.Location(file, position),
                 });
             }
         }

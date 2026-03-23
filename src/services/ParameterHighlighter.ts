@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
+import { IParameterHighlighter } from '../interfaces';
 
-export class ParameterHighlighter {
+export class ParameterHighlighter implements IParameterHighlighter {
     private paramDecoration = vscode.window.createTextEditorDecorationType({
         color: '#FF9800',
         fontWeight: 'bold',
