@@ -7,6 +7,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 - *No unreleased changes at the moment.*
 
+## [0.0.7] - The "Dead Code Precision" Update
+
+### Fixed
+- **Dead Code Sweeper — Cucumber Expression Matching:** Step patterns using cucumber expressions (`{int}`, `{string}`, `{float}`, `{word}`) are now converted to their regex equivalents before matching against feature files. Previously, raw expressions like `{string}` were passed directly to `RegExp`, causing valid steps to be falsely reported as unused.
+- **Dead Code Sweeper — Scenario Outline Support:** Feature lines containing `<placeholder>` parameters (from Scenario Outlines) are now matched using wildcard expansion. Steps used only in Scenario Outlines are no longer falsely reported as unused.
+- **StepScanner Delimiter Pairing:** Separated regex-delimited (`/pattern/`) and string-delimited (`'pattern'`, `"pattern"`) step extraction into two distinct passes with proper delimiter pairing. This prevents pattern truncation when a regex step contains quote characters inside the pattern.
+
+### Added
+- **Clickable Diagnostics:** Unused steps are now reported as ⚠️ warnings in the VS Code Problems panel (`Ctrl+Shift+M`), allowing one-click navigation to the step definition. The Output Channel summary report is preserved alongside.
+
 ## [0.0.6] - The "Visibility & Discovery" Update
 
 ### Added
