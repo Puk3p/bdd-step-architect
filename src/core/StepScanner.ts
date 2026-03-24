@@ -14,15 +14,24 @@ export class StepScanner implements IStepScanner {
             const document = await vscode.workspace.openTextDocument(file);
             const text = document.getText();
 
-            const stepRegex = new RegExp(`(${GHERKIN_KEYWORD_PATTERN})\\s*\\(\\s*[/\`'"](.*?)[/\`'"]`, 'g');
+            const regexStep = new RegExp(`(${GHERKIN_KEYWORD_PATTERN})\\s*\\(\\s*/(.*?)/`, 'gs');
+            const stringStep = new RegExp(`(${GHERKIN_KEYWORD_PATTERN})\\s*\\(\\s*(['"\`])(.*?)\\2`, 'gs');
             let match;
 
-            while ((match = stepRegex.exec(text)) !== null) {
+            while ((match = regexStep.exec(text)) !== null) {
                 const position = document.positionAt(match.index);
-
                 this.steps.push({
                     type: match[1],
                     pattern: match[2],
+                    location: new vscode.Location(file, position),
+                });
+            }
+
+            while ((match = stringStep.exec(text)) !== null) {
+                const position = document.positionAt(match.index);
+                this.steps.push({
+                    type: match[1],
+                    pattern: match[3],
                     location: new vscode.Location(file, position),
                 });
             }
