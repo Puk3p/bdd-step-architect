@@ -4,6 +4,7 @@ import { InsertStepCommandHandler } from './commands/InsertStepCommandHandler';
 import { JumpToStepCommandHandler } from './commands/JumpToStepCommandHandler';
 import { OpenTestDataCommandHandler } from './commands/OpenTestDataCommandHandler';
 import { RenameStepCommandHandler } from './commands/RenameStepCommandHandler';
+import { SearchStepCommandHandler } from './commands/SearchStepCommandHandler';
 import { GherkinParser } from './core/GherkinParser';
 import { SnippetGenerator } from './core/SnippetGenerator';
 import { StepScanner } from './core/StepScanner';
@@ -13,6 +14,7 @@ import { BddCompletionProvider } from './providers/BddCompletionProvider';
 import { BddDefinitionProvider } from './providers/BddDefinitionProvider';
 import { BddStepCatalogProvider } from './providers/BddStepCatalogProvider';
 import { FeatureCodeLensProvider } from './providers/FeatureCodeLensProvider';
+import { FeatureGraphProvider } from './providers/FeatureGraphProvider';
 import { TestDataLinkProvider } from './providers/TestDataLinkProvider';
 import { AnimationService } from './services/AnimationService';
 import { ConfigProvider } from './services/ConfigProvider';
@@ -38,6 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const gutterDecorator = new GutterDecorator();
 
     await scanner.scanWorkspace();
+    await featureScanner.scanWorkspace();
 
     const catalogProvider = new BddStepCatalogProvider(scanner);
     const insertHandler = new InsertStepCommandHandler(generator, fileSelector, importResolver, animationService);
@@ -48,6 +51,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const sweeper = new DeadCodeSweeper(scanner);
     const actionProvider = new BddCodeActionProvider(parser, generator);
     const completionProvider = new BddCompletionProvider(scanner);
+    const searchHandler = new SearchStepCommandHandler(scanner);
 
     if (vscode.window.activeTextEditor) {
         highlighter.highlight(vscode.window.activeTextEditor);
@@ -75,6 +79,14 @@ export async function activate(context: vscode.ExtensionContext) {
     tsWatcher.onDidCreate(rescanAndRefresh);
     tsWatcher.onDidDelete(rescanAndRefresh);
 
+    const featureWatcher = vscode.workspace.createFileSystemWatcher('**/*.feature');
+    const rescanFeatures = async () => {
+        await featureScanner.scanWorkspace();
+    };
+    featureWatcher.onDidChange(rescanFeatures);
+    featureWatcher.onDidCreate(rescanFeatures);
+    featureWatcher.onDidDelete(rescanFeatures);
+
     context.subscriptions.push(
         vscode.commands.registerCommand('bdd-step-architect.insertStep', (parsedStep: any) =>
             insertHandler.execute(parsedStep),
@@ -90,6 +102,15 @@ export async function activate(context: vscode.ExtensionContext) {
             openTestDataHandler.execute(fileName),
         ),
         vscode.commands.registerCommand('bdd-step-architect.findUnusedSteps', () => sweeper.findUnusedSteps()),
+        vscode.commands.registerCommand('bdd-step-architect.searchSteps', () => searchHandler.execute()),
+        vscode.commands.registerCommand('bdd-step-architect.showFeatureGraph', () => {
+            const editor = vscode.window.activeTextEditor;
+            if (editor && editor.document.fileName.endsWith('.feature')) {
+                FeatureGraphProvider.show(editor.document);
+            } else {
+                vscode.window.showWarningMessage('Open a .feature file first to visualize it.');
+            }
+        }),
         vscode.commands.registerCommand(
             'bdd-step-architect.showStepUsages',
             (uri: vscode.Uri, pos: vscode.Position, locs: vscode.Location[]) =>
@@ -105,6 +126,7 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerDocumentLinkProvider({ pattern: '**/*.feature' }, new TestDataLinkProvider()),
         vscode.window.registerTreeDataProvider('bddStepCatalog', catalogProvider),
         tsWatcher,
+        featureWatcher,
         activeEditorChange,
         documentChange,
     );

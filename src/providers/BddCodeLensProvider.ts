@@ -12,24 +12,47 @@ export class BddCodeLensProvider implements vscode.CodeLensProvider {
         const lenses: vscode.CodeLens[] = [];
         const text = document.getText();
 
-        const stepRegex = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*\\/(.+?)\\/`, 'g');
+        const regexStepPattern = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*\\/(.+?)\\/`, 'g');
+        const stringStepPattern = new RegExp(`(${STEP_DEFINITION_KEYWORD_PATTERN})\\(\\s*['"\`](.+?)['"\`]`, 'g');
+
+        const matches: { keyword: string; rawPattern: string; index: number; isRegex: boolean }[] = [];
+
         let match;
+        while ((match = regexStepPattern.exec(text)) !== null) {
+            matches.push({ keyword: match[1], rawPattern: match[2], index: match.index, isRegex: true });
+        }
+        while ((match = stringStepPattern.exec(text)) !== null) {
+            matches.push({ keyword: match[1], rawPattern: match[2], index: match.index, isRegex: false });
+        }
 
-        while ((match = stepRegex.exec(text)) !== null) {
-            const keyword = match[1];
-            const rawPattern = match[2];
+        matches.sort((a, b) => a.index - b.index);
 
-            const cleanPattern = rawPattern.replace(/^\^/, '').replace(/\$$/, '');
+        for (const entry of matches) {
+            const { keyword, rawPattern, isRegex } = entry;
 
-            const humanReadable = cleanPattern
-                .replace(/\(\[\^"\]\+\)/g, '{string}')
-                .replace(/\(\[\^'\]\+\)/g, '{string}')
-                .replace(/\(\\d\+\(\?:\.\\d\+\)\?\)/g, '{number}')
-                .replace(/\\\?/g, '?')
-                .replace(/\(\?:\s.*?\)\?/g, '{optional}')
-                .replace(/\(([^)|]+)\|([^)|]+)\)/g, '{$1 or $2}');
+            let cleanPattern: string;
+            let humanReadable: string;
 
-            const line = document.positionAt(match.index).line;
+            if (isRegex) {
+                cleanPattern = rawPattern.replace(/^\^/, '').replace(/\$$/, '');
+                humanReadable = cleanPattern
+                    .replace(/\(\[\^"\]\+\)/g, '{string}')
+                    .replace(/\(\[\^'\]\+\)/g, '{string}')
+                    .replace(/\(\\d\+\(\?:\.\\d\+\)\?\)/g, '{number}')
+                    .replace(/\\\?/g, '?')
+                    .replace(/\(\?:\s.*?\)\?/g, '{optional}')
+                    .replace(/\(([^)|]+)\|([^)|]+)\)/g, '{$1 or $2}');
+            } else {
+                humanReadable = rawPattern;
+                cleanPattern = rawPattern
+                    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+                    .replace(/\\{int\\}/g, '\\d+')
+                    .replace(/\\{float\\}/g, '\\d+\\.?\\d*')
+                    .replace(/\\{string\\}/g, '[^"]+')
+                    .replace(/\\{word\\}/g, '\\w+');
+            }
+
+            const line = document.positionAt(entry.index).line;
             const range = new vscode.Range(line, 0, line, 0);
 
             let title = `✨ BDD: ${keyword} ${humanReadable}`;

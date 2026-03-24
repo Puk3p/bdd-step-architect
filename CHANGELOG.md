@@ -7,6 +7,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 - *No unreleased changes at the moment.*
 
+## [0.0.6] - The "Visibility & Discovery" Update
+
+### Added
+- **Feature Graph Visualizer:** A new webview panel that renders an interactive flow graph of any `.feature` file. Shows the Feature header, Background block, and Scenarios as connected cards with color-coded step nodes (Given=blue, When=yellow, Then=green, And=purple, But=orange). Includes collapse/expand controls, tags display, step grouping with action separators, line numbers, and a legend. Triggered via a graph icon in the editor title bar or from the command palette (`BDD: Visualize Feature Graph`).
+- **Step Search (Quick Pick):** A new `🔍` search button in the Step Catalog sidebar title bar. Opens a fuzzy-search Quick Pick across all step definitions — search by keyword, pattern, or file name and jump directly to the definition. Also available via command palette (`BDD: Search Step Definitions`).
+- **Feature File Caching:** `FeatureScanner` now pre-caches all parsed step lines from `.feature` files at startup. CodeLens resolution in `.ts` files is now near-instant instead of re-reading every feature file from disk on each call. A `.feature` file watcher auto-refreshes the cache on changes.
+
+### Fixed
+- **String-Delimited Step Definitions:** `BddCodeLensProvider` and `BddDefinitionProvider` now correctly match step definitions using string syntax (`'pattern'`, `"pattern"`) in addition to regex syntax (`/pattern/`). Previously, only regex-delimited steps were visible — string-based steps like `Then('the response httpCode should be {int}', ...)` were invisible to CodeLens and Go To Definition.
+
 ## [0.0.5] - The "God Mode" & Refactoring Update
 
 ### Added

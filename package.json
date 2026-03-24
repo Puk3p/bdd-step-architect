@@ -2,7 +2,7 @@
     "name": "bdd-step-architect",
     "displayName": "BDD Step Architect",
     "description": "Smart BDD Assistant for Playwright and TypeScript",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "publisher": "Puk3p",
     "icon": "icons/logo.png",
     "author": {
@@ -52,6 +52,16 @@
             {
                 "command": "bdd-step-architect.generateBulkSteps",
                 "title": "BDD: Generate Bulk Steps"
+            },
+            {
+                "command": "bdd-step-architect.searchSteps",
+                "title": "BDD: Search Step Definitions",
+                "icon": "$(search)"
+            },
+            {
+                "command": "bdd-step-architect.showFeatureGraph",
+                "title": "BDD: Visualize Feature Graph",
+                "icon": "$(type-hierarchy)"
             }
         ],
         "menus": {
@@ -62,7 +72,19 @@
                     "group": "inline"
                 }
             ],
+            "editor/title": [
+                {
+                    "command": "bdd-step-architect.showFeatureGraph",
+                    "when": "resourceExtname == .feature",
+                    "group": "navigation"
+                }
+            ],
             "view/title": [
+                {
+                    "command": "bdd-step-architect.searchSteps",
+                    "when": "view == bddStepCatalog",
+                    "group": "navigation"
+                },
                 {
                     "command": "bdd-step-architect.findUnusedSteps",
                     "when": "view == bddStepCatalog",
