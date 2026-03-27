@@ -71,21 +71,33 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
     const tsWatcher = vscode.workspace.createFileSystemWatcher('**/*.ts');
-    const rescanAndRefresh = async () => {
-        await scanner.scanWorkspace();
-        catalogProvider.refresh();
+    let tsDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+    const debouncedRescan = () => {
+        if (tsDebounceTimer) {
+            clearTimeout(tsDebounceTimer);
+        }
+        tsDebounceTimer = setTimeout(async () => {
+            await scanner.scanWorkspace();
+            catalogProvider.refresh();
+        }, 500);
     };
-    tsWatcher.onDidChange(rescanAndRefresh);
-    tsWatcher.onDidCreate(rescanAndRefresh);
-    tsWatcher.onDidDelete(rescanAndRefresh);
+    tsWatcher.onDidChange(debouncedRescan);
+    tsWatcher.onDidCreate(debouncedRescan);
+    tsWatcher.onDidDelete(debouncedRescan);
 
     const featureWatcher = vscode.workspace.createFileSystemWatcher('**/*.feature');
-    const rescanFeatures = async () => {
-        await featureScanner.scanWorkspace();
+    let featureDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+    const debouncedFeatureRescan = () => {
+        if (featureDebounceTimer) {
+            clearTimeout(featureDebounceTimer);
+        }
+        featureDebounceTimer = setTimeout(async () => {
+            await featureScanner.scanWorkspace();
+        }, 500);
     };
-    featureWatcher.onDidChange(rescanFeatures);
-    featureWatcher.onDidCreate(rescanFeatures);
-    featureWatcher.onDidDelete(rescanFeatures);
+    featureWatcher.onDidChange(debouncedFeatureRescan);
+    featureWatcher.onDidCreate(debouncedFeatureRescan);
+    featureWatcher.onDidDelete(debouncedFeatureRescan);
 
     context.subscriptions.push(
         vscode.commands.registerCommand('bdd-step-architect.insertStep', (parsedStep: any) =>
