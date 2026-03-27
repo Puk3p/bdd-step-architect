@@ -7,6 +7,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 - *No unreleased changes at the moment.*
 
+## [0.0.8] - The "Stability" Update
+
+### Fixed
+- **Branch Switch Step Explosion:** File watchers now use 500ms debouncing to prevent concurrent workspace scans. Previously, switching branches triggered hundreds of simultaneous `scanWorkspace()` calls, inflating the Step Catalog to ~70,000 duplicate entries.
+
 ## [0.0.7] - The "Dead Code Precision" Update
 
 ### Fixed
