@@ -4,3 +4,7 @@ node_modules
 .vscode-test/
 *.vsix
 .DS_Store
+.idea/
+png
+src/test/runTest.ts
+src/test/suite/

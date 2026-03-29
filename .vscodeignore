@@ -1,5 +1,7 @@
 .vscode/**
 .vscode-test/**
+.idea/**
+png
 .github/**
 .husky/**
 src/**
