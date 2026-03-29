@@ -72,7 +72,7 @@ export class BddCodeLensProvider implements vscode.CodeLensProvider {
                         tooltip: 'Click to see all places where this step is used',
                     };
                 } else {
-                    title += `   |   ⚠️ Unused step`;
+                    title += `   |   Unused step`;
                     commandAction = {
                         title: title,
                         command: '',

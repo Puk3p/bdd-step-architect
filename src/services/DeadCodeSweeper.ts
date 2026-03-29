@@ -119,7 +119,7 @@ export class DeadCodeSweeper {
                     const diagnostic = new vscode.Diagnostic(
                         step.location.range,
                         `Unused step: [${step.type?.trim()}] ${cleanPattern}`,
-                        vscode.DiagnosticSeverity.Warning,
+                        vscode.DiagnosticSeverity.Information,
                     );
                     diagnostic.source = 'BDD Dead Code';
 

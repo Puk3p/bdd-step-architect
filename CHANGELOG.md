@@ -7,6 +7,15 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 - *No unreleased changes at the moment.*
 
+## [0.0.9] - The "Clean Signals" Update
+
+### Changed
+- **Unused Step Indicator:** Removed warning emoji from CodeLens — now shows plain "Unused step" text without visual alarm.
+- **Dead Code Sweeper:** Diagnostic severity changed from Warning to Information — unused steps no longer appear as yellow warnings in VS Code/WebStorm Problems panel.
+
+### Fixed
+- **TypeScript Compilation:** Added `skipLibCheck` to `tsconfig.json` to prevent third-party type errors on newer Node.js versions.
+
 ## [0.0.8] - The "Stability" Update
 
 ### Fixed
